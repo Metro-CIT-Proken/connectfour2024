@@ -1,30 +1,18 @@
-import requests
+import socketio
 
+sio = socketio.Client()
 
-from game_controller import *
-from game import Game
+@sio.on('board')
+def on_server_data(data):
+    print(f"Received: {data}")
 
-def main():
-    url = 'http://127.0.0.1:8432'
+# @sio.event
+# def connect():
+#     print("Success connect")
 
-    # first_player_id = input("先手のプレイヤーID")
-    # response = requests.post(url, json={'player': "first", "name":first_player_id})
-    # if response.status_code == 200:
-    #     print("サーバーの接続に成功しました。")
-    # second_player_id = input("後手のプレイヤーID")
-    # response = requests.post(url, json={'player': "second", "name":second_player_id})
-    # if response.status_
-    player_id = input("プレイヤーIDを入力してください")
-    game_controller = GameController(first_player_id, second_player_id)
-    game_controller.start()
+# @sio.event
+# def disconnect():
+#     print("Success disconnect")
 
-    while(True):
-        player_id = input("プレイヤーIDを入力してください")
-        pos = int(input("場所を入力してください"))
-
-        game_controller.setAction(player_id, pos)
-
-
-
-if __name__ == '__main__':
-    main()
+sio.connect('ws://localhost:8432')
+sio.wait()

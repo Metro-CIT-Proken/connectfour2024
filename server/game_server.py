@@ -1,13 +1,30 @@
 from flask import Flask, request, jsonify
-
+from flask_socketio import SocketIO, emit
+import json
 
 from game_controller import GameController
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key'
+socketio = SocketIO(app)
 
 games = list[GameController]()
 games.append(GameController("player1", "player2"))
-games.append(GameController("player3", "player4"))
+# games.append(GameController("player3", "player4"))
+
+#一定時間ごとに盤面(二次元配列）を一方的に送信する
+def handle_update_board(game: GameController):
+    list_board = game.game.board_to_list()
+    first_id = game.first_player_id
+    second_id = game.second_player_id
+    data = {"board":list_board, "first": first_id, "second": second_id }
+    data = json.dumps(data)
+    socketio.emit('board', data)
+
+#ゲームの開始とアップデートをしたときに実行される関数の追加
+for game in games:
+    game.start()
+    game.update_handlers.append(handle_update_board)
 
 #複数の試合の中からプレイヤ-IDで試合を取得する
 def getGame(player_id: str):
@@ -46,9 +63,20 @@ def convert_board(is_first: bool, list_board: list[list[int]]):
 #自分の駒を置く座標を提出する
 @app.route('/submit', methods=['POST'])
 def submit():
-    choice_location = request.args.get('token')
-    pass
+    player_id = request.args.get('token')
+    choice_location = request.json.get('location')
+    game = getGame(player_id)
 
+    #プレイヤーIDから試合が取得できた場合
+    if game != None:
+        try:
+            game.setAction(player_id, choice_location)
+            return "成功しました"
+        except ValueError as error:
+            return str(error)
+
+    else:
+        return "ゲームが見つかりませんでした"
 
 #自分の試合の盤面(二次元配列）を取得する
 @app.route('/get', methods=['GET'])
@@ -68,3 +96,6 @@ def get():
 
 if __name__ == '__main__':
     app.run(port=8432, debug=True)
+    # socketio.run(app, host="127.0.0.1", port=8432, debug=True)
+
+

@@ -12,6 +12,7 @@ class GameController:
         self.second_player_id = second_player_id
         self.next_position = dict[str, int]()
         self.update_timer: Timer = None
+        self.update_handlers = list()
 
     def _startUpdateTimer(self):
         self.update_timer = Timer(10.0, self.update)
@@ -49,6 +50,9 @@ class GameController:
             self.game.advance(next_position)
             self.game.print_board(sys.stderr)
             self._startUpdateTimer()
+
+            for func in self.update_handlers:
+                func(self)
 
         except Exception as E:
             print(traceback.format_exc(E))
