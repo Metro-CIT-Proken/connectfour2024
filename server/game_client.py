@@ -6,13 +6,18 @@ sio = socketio.Client()
 def on_server_data(data):
     print(f"Received: {data}")
 
-# @sio.event
-# def connect():
-#     print("Success connect")
+@sio.on('result')
+def recieve_result(data):
+    message = data["message"]
+    print(message)
 
-# @sio.event
-# def disconnect():
-#     print("Success disconnect")
+@sio.event
+def connect():
+    print("Success connect")
 
-sio.connect('ws://localhost:8432')
+@sio.event
+def disconnect():
+    print("Success disconnect")
+
+sio.connect('http://127.0.0.1:8432')
 sio.wait()

@@ -12,11 +12,28 @@ games = list[GameController]()
 games.append(GameController("player1", "player2"))
 # games.append(GameController("player3", "player4"))
 
+
+def end_game(first_player_id, second_player_id, game):
+
+    if game.is_first_win:
+        winner = first_player_id
+    else:
+        winner = second_player_id
+
+    result  = {"message" : f"ゲームが終了しました。 {winner}が勝利しました。","winner": winner}
+    json.dumps(result)
+    socketio.emit("message", result)
+    print(f"ゲームが終了しました。 {winner} が勝利しました")
+
 #一定時間ごとに盤面(二次元配列）を一方的に送信する
 def handle_update_board(game: GameController):
     list_board = game.game.board_to_list()
     first_id = game.first_player_id
     second_id = game.second_player_id
+
+    if game.game.is_end():
+        end_game(game.first_player_id, game.second_player_id, game.game)
+
     data = {"board":list_board, "first": first_id, "second": second_id }
     data = json.dumps(data)
     socketio.emit('board', data)
@@ -25,6 +42,9 @@ def handle_update_board(game: GameController):
 for game in games:
     game.start()
     game.update_handlers.append(handle_update_board)
+
+
+
 
 #複数の試合の中からプレイヤ-IDで試合を取得する
 def getGame(player_id: str):
@@ -95,7 +115,7 @@ def get():
     return "ゲームが見つかりませんでした"
 
 if __name__ == '__main__':
-    app.run(port=8432, debug=True)
-    # socketio.run(app, host="127.0.0.1", port=8432, debug=True)
+    # app.run(port=8432, debug=True)
+    socketio.run(app, host="127.0.0.1", port=8432, debug=True)
 
 
