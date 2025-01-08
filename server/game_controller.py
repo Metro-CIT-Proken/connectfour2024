@@ -6,10 +6,11 @@ import sys
 from game import *
 
 class GameController:
-    def __init__(self, first_player_id, second_player_id):
+    def __init__(self, first_player_id, second_player_id, match_id):
         self.game = Game()
         self.first_player_id = first_player_id
         self.second_player_id = second_player_id
+        self.match_id = match_id
         self.next_position = dict[str, int]()
         self.update_timer: Timer = None
         self.update_handlers = list()
