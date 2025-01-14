@@ -36,13 +36,8 @@ while(True):
 
     player_id = input("プレイヤーIDを決めてください: ")#プレイヤー名
 
-    try:
-        x = int(input("座標を入力してください: "))#置く座標
-        if(x < 0 and x > 6):
-            raise ValueError
+    x = int(input("座標を入力してください: "))#置く座標
 
-    except ValueError as error:
-        print("座標は正の整数にしてください" + str(error))
 
     json_data = {"location": str(x), "player": player_id}
     # json_data = json.dumps(json_data)
@@ -51,6 +46,6 @@ while(True):
     if response.status_code == 200:
         print("POSTに成功しました")
     else:
-        print(f"エラーが発生しました {response.status_code}")
+        print(f"エラーが発生しました {response.status_code}\n{response.text}")
 
 sio.wait()

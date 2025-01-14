@@ -9,7 +9,6 @@ from game_controller import GameController
 def random_string(length):
     return ''.join(random.choices(string.ascii_letters + string.digits,k=length))
 
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 socketio = SocketIO(app)
@@ -18,7 +17,6 @@ games = list[GameController]()
 match_id = random_string(10)
 games.append(GameController("player1", "player2",match_id))
 # games.append(GameController("player3", "player4"))
-
 
 
 def end_game(first_player_id, second_player_id, game):
@@ -30,7 +28,7 @@ def end_game(first_player_id, second_player_id, game):
 
     result  = {"message" : f"ゲームが終了しました。 {winner}が勝利しました。","winner": winner}
     json.dumps(result)
-    socketio.emit("result", result)
+    socketio.emit("message", result)
     print(f"ゲームが終了しました。 {winner} が勝利しました")
 
 #一定時間ごとに盤面(二次元配列）を一方的に送信する
@@ -38,12 +36,11 @@ def handle_update_board(game: GameController):
     list_board = game.game.board_to_list()
     first_id = game.first_player_id
     second_id = game.second_player_id
-    match_id =  game.match_id
 
     if game.game.is_end():
         end_game(game.first_player_id, game.second_player_id, game.game)
 
-    data = {"match_id": match_id, "board":list_board, "first": first_id, "second": second_id }
+    data = {"board":list_board, "first": first_id, "second": second_id }
     data = json.dumps(data)
     socketio.emit('board', data)
 
@@ -89,11 +86,26 @@ def convert_board(is_first: bool, list_board: list[list[int]]):
             if col[i] == 0:
                 col[i] = '.'
 
+#試合の中にプレイヤーが存在するか判定
+def is_exist_player(player_id:str):
+    for game in games:
+        if game.first_player_id == player_id or game.second_player_id == player_id:
+            return True
+    return False
+
 #自分の駒を置く座標を提出する
 @app.route('/submit', methods=['POST'])
 def submit():
     player_id = request.json.get('player')
     choice_location = int(request.json.get("location"))
+
+    if not(is_exist_player(player_id)):
+        return "プレイヤーが存在しません。", 403
+
+    if choice_location < 0 or choice_location > 6:
+        return "指定した座標は盤面の範囲外です。", 410
+
+
     game = getGame(player_id)
 
     #プレイヤーIDから試合が取得できた場合

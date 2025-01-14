@@ -17,7 +17,7 @@ class GameController:
 
     #10秒ごとにupdate関数を実行するようにする。
     def _startUpdateTimer(self):
-        self.update_timer = Timer(10.0, self.update)
+        self.update_timer = Timer(40.0, self.update)
         self.update_timer.daemon = True
         self.update_timer.start()
 
