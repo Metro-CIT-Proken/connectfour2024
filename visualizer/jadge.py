@@ -6,10 +6,8 @@ def is_win(field, player1, player2):
     rows, cols = field.shape
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            if(field[i][j]=='.'):
+            if(field[i][j]=='0'):
                 count_dot+=1
-            
-    
     # 勝利条件をチェックする関数
     def check_winner(symbol):
         # 横方向
@@ -39,13 +37,13 @@ def is_win(field, player1, player2):
         return False
 
     # 各プレイヤーの勝利判定
-    if check_winner('#'):
+    if check_winner('1'):
         return player1
-    elif check_winner('@'):
+    elif check_winner('2'):
         return player2
     elif count_dot==0:
         return "draw"
     else:
-        return None  # 勝者がいない場合
+        return "in game"  # 勝者がいない場合
 
 
