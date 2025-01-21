@@ -36,11 +36,12 @@ def handle_update_board(game: GameController):
     list_board = game.game.board_to_list()
     first_id = game.first_player_id
     second_id = game.second_player_id
+    match_id=game.match_id
 
     if game.game.is_end():
         end_game(game.first_player_id, game.second_player_id, game.game)
 
-    data = {"board":list_board, "first": first_id, "second": second_id }
+    data = {"match_id":match_id,"board":list_board, "first": first_id, "second": second_id }
     data = json.dumps(data)
     socketio.emit('board', data)
 
