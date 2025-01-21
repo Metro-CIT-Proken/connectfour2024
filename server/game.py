@@ -122,7 +122,7 @@ class Game:
         if np.all(self.legal_list==False):
             return  True
         return False
-
+    
     def is_all(self,array):
         if not(isinstance(array, np.ndarray)):
             print("配列はndarray型である必要があります。")
