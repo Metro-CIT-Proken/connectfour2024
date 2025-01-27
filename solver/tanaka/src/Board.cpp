@@ -1,5 +1,4 @@
 #include "Board.hpp"
-#include "Solver.hpp"
 
 using namespace std;
 
@@ -7,7 +6,7 @@ using namespace std;
 
 Board::Board(){
     board = vector< vector < int > > (BOARD_HEIGHT_SIZE, vector<int>(BOARD_WIDTH_SIZE, 0));
-    legal_list = vector<bool> (BOARD_WIDTH_SIZE, true);
+    legal_list = vector<pair<bool,int> > (BOARD_WIDTH_SIZE, make_pair(true, 0));
     is_first = true;
     is_first_win = false;
     is_draw = false;
@@ -26,33 +25,17 @@ void Board::display(){
 }
 
 
-void Board::show_align_piece()
-{
-    Solver solver;
 
-    for(int i = 0;i<BOARD_HEIGHT_SIZE;i++)
-    {
-        for(int j = 0;j<BOARD_WIDTH_SIZE;j++)
-        {
-            cout << " 先手: "<<"x座標" << j << "y座標" << i << " : " << solver.count_align_piece(board, j, i, 1) << endl;
-        }
-    }
-    cout << "############################################" << endl;
-    for(int i = 0;i<BOARD_HEIGHT_SIZE;i++)
-    {
-        for(int j = 0;j<BOARD_WIDTH_SIZE;j++)
-        {
-            cout << " 後手: " << "x座標" << j << "y座標" << i << " : " << solver.count_align_piece(board, j, i, 2) << endl;
-        }
-    }
-}
 
 
 
 
 void Board::advance(int x)
 {
-    if(legal_list[x])
+    update_legal_list();
+
+
+    if(legal_list[x].first)
     {
 
 
@@ -69,16 +52,31 @@ void Board::advance(int x)
             }
         }
 
+        if(i == 0)
+        {
+            cout << "コマが置けません" << endl;
+            return;
+        }
+
+
         if(is_first)
         {
+
             board[i-1][x] = FIRST;
         }
         else{
             board[i-1][x] = SECOND;
         }
 
+        cout << 999 << endl;
+
+
+        update_legal_list();
         turn++;
         is_first = !is_first;
+
+
+
     }
     else
     {
@@ -86,30 +84,34 @@ void Board::advance(int x)
     }
 }
 
-
-vector<int>  Board::legal_action()
+void Board::update_legal_list()
 {
-    vector<int> legal_pos;
-
-    for(int j = 0;j<board[0].size();j++)
+    for(int j = 0;j<BOARD_WIDTH_SIZE;j++)
     {
-        bool ch = true;
-        for(int i = 0;i<board.size();i++)
+        int i = 0;
+        while(i < BOARD_HEIGHT_SIZE)
         {
             if(board[i][j] == 0)
             {
-                ch = false;
+                i++;
+            }
+            else{
+                break;
             }
         }
 
-        if(ch)
+        if(i == 0)
         {
-            legal_pos.push_back(j);
+            legal_list[j] = make_pair(false, -1);
+        }
+        else{
+            legal_list[j] = make_pair(true, i-1);
         }
     }
 
-    return legal_pos;
+
 }
+
 
 
 
@@ -229,12 +231,34 @@ bool Board::is_end()
 
 bool Board::is_all(vector<int> array)
 {
+    bool ch = true;
     for(int &i : array)
     {
-        if(i == 0)
+
+        if(i != FIRST)
         {
-            return false;
+            ch = false;
         }
     }
-    return true;
+
+    if(ch){
+        is_first_win = true;
+        return true;
+    }
+
+    ch = true;
+    for(int &i : array)
+    {
+        if(i != SECOND)
+        {
+            ch = false;
+        }
+    }
+
+    if(ch) {
+        return true;
+    }
+
+    return false;
+
 }

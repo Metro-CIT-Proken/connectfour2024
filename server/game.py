@@ -14,7 +14,25 @@ class Game:
         self.is_first = True
         self.is_first_win = False
         self.is_draw = False
-        self.legal_list = np.full(self.width, True, bool)
+        self.legal_list = np.array([(True,self.height-1)]*self.width, dtype=object)
+        print(self.legal_list)
+
+
+    def update_legal_list(self):
+        for j in range(0,len(self.board[0])):
+            i = 0
+
+            while i < self.height:
+                if self.board[i][j] == 0:
+                    i+=1
+                else:
+                    break
+            if i == 0:
+                self.legal_list[j] = (False, -1)
+            else:
+                self.legal_list[j] = (True, i-1)
+
+
 
 
 
@@ -24,34 +42,33 @@ class Game:
             print("ボードの幅、高さが合っていません")
             raise ValueError
 
-        if self.legal_list[x]:
+        if self.legal_list[x][0]:
             vertical_array = self.board[:,x]
-            i = 0
-            while vertical_array[i] == 0 :
-                i+=1
-                if i == self.height:
-                    break
-            if self.is_first:#先手
-                vertical_array[i-1] = FIRST
-            else:#後手
-                vertical_array[i-1] = SECOND
+            # i = 0
+            # while vertical_array[i] == 0 :
+            #     i+=1
+            #     if i == self.height:
+            #         break
+            # if self.is_first:#先手
+            #     vertical_array[i-1] = FIRST
+            # else:#後手
+            #     vertical_array[i-1] = SECOND
 
+            if self.is_first:
+                vertical_array[self.legal_list[x][1]] = FIRST
+
+            else:
+                vertical_array[self.legal_list[x][1]] = SECOND
+
+
+            self.update_legal_list()
             self.turn+=1
             self.is_first = not(self.is_first)
-            return self.board
 
 
         else:
             print("この列に駒を置けません")
-            return None
 
-    def legal_action(self):
-        legal_pos = list[list]()
-        for i in range(self.width):
-            vertical_array = self.board[:, i]
-            if not np.any(vertical_array == 0):
-                legal_pos.append(i)
-        return legal_pos
 
     def is_end(self):
         if len(self.board) != 6 or len(self.board[0]) != 7 :
@@ -119,10 +136,11 @@ class Game:
                     four_array = bottom_left_array[0:4]
                     if self.is_all(four_array):
                         return True
-        if np.all(self.legal_list==False):
+        if np.all([not(v[0]) for v in self.legal_list]):
+            self.is_draw = True
             return  True
         return False
-    
+
     def is_all(self,array):
         if not(isinstance(array, np.ndarray)):
             print("配列はndarray型である必要があります。")
@@ -133,9 +151,8 @@ class Game:
             return True
         elif np.all(array == SECOND):
             return True
-        else:
-            self.is_draw = True
-            return False
+
+        return False
 
 
     def print_board(self, output=sys.stdout):
@@ -160,7 +177,6 @@ class Game:
             if self.is_end():
                 break
 
-            self.legal_action()
         self.end()
 
     def end(self):
@@ -174,3 +190,9 @@ class Game:
     def board_to_list(self):
         list_board = self.board.tolist()
         return list_board
+
+
+
+game = Game()
+
+game.main()

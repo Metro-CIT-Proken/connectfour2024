@@ -13,8 +13,7 @@ class Board{
         static const int BOARD_HEIGHT_SIZE = 6;
         static const int FIRST = 1;
         static const int SECOND = 2;
-        vector<vector<int> > board;
-        vector<bool> legal_list;
+        static const int EMPTY = 0;
         bool is_first;
         bool is_first_win;
         bool is_draw;
@@ -22,11 +21,12 @@ class Board{
 
     public:
         Board();
-        void show_align_piece();
+        vector< pair<bool, int> > legal_list;
+        vector<vector<int> > board;
         void display();
         void advance(int x);
-        vector<int> legal_action();
         vector<int> take_four_vector(int dx, int dy, int sx , int sy);
+        void update_legal_list();
 
 
         bool is_end();
